@@ -1,0 +1,13 @@
+{
+  "upload_image_title": "Upload your image!",
+  "upload_image": "Remove the background from your image.",
+  "upload_image2": "100% automatic and free!",
+  "error_upload": "An error occurred while uploading the image.",
+  "magic_done": "Magic is done! Download your amazing image!",
+  "download_example": "Download one of the images below and send it by clicking the button above. We'll handle the rest!",
+
+  "image_success_flow": "The magic is done, download your amazing image!",
+  "error_not_image": "Please, upload images only.",
+  "mysterious_error": "An error occurred while uploading the image.",
+  "select_language_msg": "Select your favorite language!"
+}
