@@ -3,7 +3,7 @@ name: Deploy in Railway Dev
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   deploy:
