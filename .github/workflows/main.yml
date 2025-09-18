@@ -1,24 +1,16 @@
-name: Deploy in Railway Dev
+name: Deploy to Railway
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   deploy:
-    name: Deploy to Railway
     runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    env:
+      SVC_ID: front-ui
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install Railway CLI
-        run: |
-          corepack prepare pnpm@latest --activate
-          pnpm dlx @railway/cli up --service=front-end --environment dev --verbose
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      - uses: actions/checkout@v3
+      - run: railway up --service=${{ env.SVC_ID }}
