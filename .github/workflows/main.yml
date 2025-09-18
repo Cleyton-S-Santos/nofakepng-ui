@@ -1,0 +1,24 @@
+name: Deploy in Railway Dev
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install Railway CLI
+        run: |
+          corepack prepare pnpm@latest --activate
+          pnpm dlx @railway/cli up --service=front-end --environment dev --verbose
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
