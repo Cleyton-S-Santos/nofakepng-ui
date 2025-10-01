@@ -16,8 +16,10 @@ declare global {
  * Inicializa o Rybbit na aplicação
  */
 export const initRybbit = (): void => {
+  console.log('🚀 Inicializando Rybbit');
+  
   if (document.querySelector(`script[data-site-id="${RYBBIT_SITE_ID}"]`)) {
-    console.log('Rybbit já está inicializado');
+    console.log('✅ Rybbit já está inicializado');
     return;
   }
 
@@ -27,11 +29,19 @@ export const initRybbit = (): void => {
   script.setAttribute('data-site-id', RYBBIT_SITE_ID);
   
   script.onload = () => {
-    console.log('Rybbit inicializado com sucesso');
+    setTimeout(() => {
+      if (window.rybbit) {
+        console.log('🎉 Rybbit carregado e disponível!');
+        console.log('📊 Endpoint do script:', script.src);
+        console.log('🆔 Site ID:', script.getAttribute('data-site-id'));
+      } else {
+        console.warn('⚠️ Script carregado mas window.rybbit não está disponível');
+      }
+    }, 100);
   };
   
   script.onerror = () => {
-    console.warn('Erro ao carregar o script do Rybbit');
+    console.error('❌ Erro ao carregar o script do Rybbit de:', script.src);
   };
   
   
@@ -48,8 +58,9 @@ export const trackEvent = (eventName: string, properties?: Record<string, any>):
       timestamp: new Date().toISOString(),
       url: window.location.href
     });
+    console.log('📊 Evento Rybbit enviado:', eventName);
   } else {
-    console.warn('Rybbit não está disponível para rastrear evento:', eventName);
+    console.warn('⚠️ Rybbit não está disponível para evento:', eventName, 'Estado:', window.rybbit);
   }
 };
 
