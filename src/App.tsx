@@ -11,6 +11,7 @@ import i18n from './i18n/i18n';
 import { useTranslation } from 'react-i18next';
 import { GrLanguage } from 'react-icons/gr';
 import { SimpleDialog } from './components/SimpleDialog';
+import { trackEvent, trackPageView, RybbitEvents } from './monitoring/rybbit';
 
 export const App: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
@@ -23,6 +24,9 @@ export const App: React.FC = () => {
 
   const handleClickOpen = () => {
     setOpen(true);
+    trackEvent(RybbitEvents.DIALOG_OPEN, {
+      dialogType: 'language_selector'
+    });
   };
 
   const handleImageLoad = () => {
@@ -32,6 +36,10 @@ export const App: React.FC = () => {
   const handleClose = (value: string) => {
     setOpen(false);
     setSelectedValue(value);
+    trackEvent(RybbitEvents.DIALOG_CLOSE, {
+      dialogType: 'language_selector',
+      selectedLanguage: value
+    });
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -39,8 +47,17 @@ export const App: React.FC = () => {
     const file = event.target.files?.[0];
 
     if (file && file.type.startsWith('image/')) {
+      trackEvent(RybbitEvents.IMAGE_UPLOAD_STARTED, {
+        fileSize: file.size,
+        fileType: file.type,
+        fileName: file.name
+      });
       await uploadImage(file);
     } else {
+      trackEvent(RybbitEvents.ERROR_OCCURRED, {
+        errorType: 'invalid_file_type',
+        attemptedFileType: file?.type || 'unknown'
+      });
       toast(t('error_not_image'), {type: "error"});
     }
   };
@@ -48,6 +65,7 @@ export const App: React.FC = () => {
     setIsUploading(true);
     const formData = new FormData();
     formData.append('file', file);
+    const startTime = performance.now();
 
     try {
       const response = await api.post('/remove-background', formData, {
@@ -60,8 +78,24 @@ export const App: React.FC = () => {
       const blob = new Blob([response.data], { type: 'image/jpeg' });
       const url = URL.createObjectURL(blob); 
       setDownloadUrl(url);
+      
+      const processingTime = performance.now() - startTime;
+      trackEvent(RybbitEvents.IMAGE_UPLOAD_SUCCESS, {
+        fileSize: file.size,
+        fileType: file.type,
+        processingTime: Math.round(processingTime),
+        responseSize: response.data.byteLength
+      });
+      
       toast(t('image_success_flow'), {type: "success"});
     } catch (error) {
+      const processingTime = performance.now() - startTime;
+      trackEvent(RybbitEvents.IMAGE_UPLOAD_ERROR, {
+        fileSize: file.size,
+        fileType: file.type,
+        processingTime: Math.round(processingTime),
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      });
       toast(t('mysterious_error'), {type: "error"})
     } finally {
       setIsUploading(false);
@@ -74,6 +108,11 @@ export const App: React.FC = () => {
       link.href = downloadUrl;
       link.download = "nofakepng.com-"+new Date().getMilliseconds()+".png";
       link.click();
+      
+      trackEvent(RybbitEvents.IMAGE_DOWNLOAD, {
+        downloadType: 'processed_image',
+        timestamp: new Date().toISOString()
+      });
     }
   };
 
@@ -82,10 +121,18 @@ export const App: React.FC = () => {
     link.href = downloadUrl;
     link.download = "nofakepng.com-"+new Date().getMilliseconds()+".png";
     link.click();
+    
+    trackEvent(RybbitEvents.IMAGE_DOWNLOAD, {
+      downloadType: 'example_image',
+      imageUrl: downloadUrl,
+      timestamp: new Date().toISOString()
+    });
   }
 
   useEffect(() => {
     i18n.changeLanguage(navigator.language.split('-')[0]);
+    // Registra a visualização da página principal
+    trackPageView();
   }, [])
 
   return (

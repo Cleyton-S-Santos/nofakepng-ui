@@ -8,9 +8,10 @@ RUN npm install
 
 COPY . .
 
-# Configuração para ambiente de produção
 ARG API_URL
 ENV VITE_NOFAKE_PNG_API_URL=${API_URL}
+ARG RYBBIT_SITE_ID
+ENV VITE_RYBBIT_SITE_ID={RYBBIT_SITE_ID}
 
 RUN npm run build
 
