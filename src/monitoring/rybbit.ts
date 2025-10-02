@@ -1,5 +1,5 @@
 
-export const RYBBIT_SITE_ID = import.meta.env.VITE_RYBBIT_SITE_ID;
+export const RYBBIT_SITE_ID = "43dda020c290";
 declare global {
   interface Window {
     rybbit?: {
